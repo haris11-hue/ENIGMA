@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO-ENIGMA vFinal_Visuals</title>
+    <style>
+        /* --- CSS ARTISTRY & RESET --- */
+        :root {
+            --wood-dark: #3e2723;
+            --wood-light: #5d4037;
+            --metal-dark: #111;
+            --metal-light: #222;
+            --gold: #d4af37;
+            --gold-shine: #f7e7b6;
+            --bakelite: #080808;
+            --lamp-off: #222;
+            --lamp-on: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Courier Prime', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #050505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- MAIN CHASSIS --- */
+        #machine-case {
+            width: 100%;
+            max-width: 760px;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.2) 50px, rgba(0,0,0,0.2) 53px),
+                linear-gradient(to bottom right, var(--wood-light), var(--wood-dark));
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 
+                0 40px 80px rgba(0,0,0,1),
+                inset 0 2px 10px rgba(255,255,255,0.1),
+                inset 0 -2px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* --- FACEPLATE --- */
+        #faceplate {
+            background-color: var(--metal-dark);
+            /* Hammered Metal Texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            border-radius: 6px;
+            padding: 25px;
+            box-shadow: 
+                inset 0 1px 2px rgba(255,255,255,0.1), 
+                0 4px 10px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+        }
+
+        /* Screws */
+        .screw {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #cdcdcd, #888);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        .screw::after { content: ''; position: absolute; top: 5px; left: 2px; right: 2px; height: 2px; background: #444; transform: rotate(45deg); }
+        .screw.tl { top: 10px; left: 10px; }
+        .screw.tr { top: 10px; right: 10px; transform: rotate(90deg); }
+        .screw.bl { bottom: 10px; left: 10px; transform: rotate(15deg); }
+        .screw.br { bottom: 10px; right: 10px; transform: rotate(-30deg); }
+
+        /* --- 1. DISPLAY PANEL (The Screen) --- */
+        #display-panel {
+            background: #000;
+            border: 3px solid var(--gold);
+            border-radius: 4px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 10px;
+            box-shadow: 
+                0 0 15px rgba(212, 175, 55, 0.1),
+                inset 0 0 20px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+            gap: 10px;
+        }
+        /* Scanline effect */
+        #display-panel::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #output-text {
+            font-family: 'Courier Prime', monospace;
+            font-size: 24px;
+            color: var(--lamp-on);
+            text-shadow: 0 0 8px var(--lamp-on);
+            white-space: nowrap;
+            overflow: hidden;
+            flex: 1;
+            text-align: right;
+            letter-spacing: 2px;
+        }
+
+        #copy-btn {
+            background: linear-gradient(to bottom, #444, #222);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            border-radius: 3px;
+            padding: 0 15px;
+            height: 100%;
+            font-family: 'Courier Prime', monospace;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 10;
+            text-shadow: 0 1px 1px #000;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+        #copy-btn:hover {
+            background: linear-gradient(to bottom, #555, #333);
+            color: #fff;
+            box-shadow: 0 0 10px var(--gold);
+        }
+        #copy-btn:active {
+            transform: translateY(1px);
+            background: #111;
+        }
+
+        #copy-indicator {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: var(--gold);
+            padding: 5px 15px;
+            border: 1px solid var(--gold);
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 20;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        #copy-indicator.show { opacity: 1; }
+
+        /* --- 2. ROTORS --- */
+        #rotors {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: linear-gradient(to bottom, #111, #000);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 15px #000;
+        }
+
+        .rotor-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rotor-window {
+            width: 44px;
+            height: 55px;
+            background: linear-gradient(90deg, #222 0%, #666 20%, #bbb 50%, #666 80%, #222 100%);
+            border: 2px solid #000;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #111;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        /* Lens glare */
+        .rotor-window::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .rotor-btn {
+            color: #555;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.1s;
+        }
+        .rotor-btn:hover { color: var(--gold); }
+
+        /* --- 3. LAMPBOARD --- */
+        #lampboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+        }
+
+        .row { display: flex; gap: 14px; }
+
+        .lamp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #444, #1a1a1a);
+            border: 2px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255,255,255,0.15);
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            transition: all 0.05s ease-out;
+        }
+
+        .lamp.active {
+            background: radial-gradient(circle at 40% 40%, #fff7cc, #ffcc00, #ff9900);
+            color: #5d4037;
+            border-color: #ffd700;
+            box-shadow: 
+                0 0 20px var(--lamp-on), 
+                0 0 40px var(--lamp-on),
+                inset 0 0 10px rgba(255,255,255,0.8);
+            text-shadow: 0 0 2px #fff;
+        }
+
+        /* --- 4. KEYBOARD --- */
+        #keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .key {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            /* Silver Rim */
+            background: conic-gradient(#bbb, #fff, #bbb, #777, #bbb);
+            padding: 3px;
+            box-shadow: 
+                0 5px 8px rgba(0,0,0,0.9),
+                0 1px 0 rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: transform 0.05s;
+        }
+        .key-cap {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #333, #000);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #eee;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+        .key:active, .key.pressed { transform: scale(0.92) translateY(2px); }
+
+        /* --- 5. PLUGBOARD (Steckerbrett) --- */
+        #plugboard-section {
+            position: relative;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 200px; /* Increased space for cables */
+        }
+        
+        .plug-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #555;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .socket {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            /* Brass finish */
+            background: radial-gradient(circle at 30% 30%, #f7e7b6, #d4af37, #8a6a3b);
+            border: 1px solid #5d4037;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 0 5px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* The Socket Hole */
+        .socket::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,1);
+        }
+
+        /* Letter label above/below socket */
+        .socket::before {
+            content: attr(data-char);
+            position: absolute;
+            top: -14px;
+            font-size: 10px;
+            color: #888;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .socket.selected {
+            box-shadow: 0 0 10px #ffcc00, 0 0 5px #fff;
+            background: #fff;
+        }
+        /* Connected state handled by SVG now */
+
+        /* Wire Layer */
+        #wire-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20; /* Wires on top of everything in this section */
+        }
+
+        @media (max-width: 600px) {
+            #machine-case { padding: 15px; border-radius: 0; }
+            .lamp, .key { width: 30px; height: 30px; }
+            .socket { width: 26px; height: 26px; }
+            .socket::before { font-size: 8px; top: -12px; }
+            .rotor-window { width: 36px; height: 48px; font-size: 20px; }
+            #output-text { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="machine-case">
+        <div class="screw tl"></div>
+        <div class="screw tr"></div>
+        <div class="screw bl"></div>
+        <div class="screw br"></div>
+
+        <div id="faceplate">
+            
+            <!-- 1. CINEMA OUTPUT DISPLAY -->
+            <div id="display-panel">
+                <div id="output-text"></div>
+                <button id="copy-btn" onclick="copyCipher()">COPY</button>
+                <div id="copy-indicator">COPIED</div>
+            </div>
+
+            <!-- 2. ROTORS -->
+            <div id="rotors">
+                <div class="rotor-unit">
+                    <div class="rotor-btn" onclick="adjustRotor(0, 1)">▲</div>
+                    <div class="rotor-window" id="r0">A</div>
+                    <div class="rotor-btn" onclick="adjustRotor(0, -1)">▼</div>
+                </div>
+                <div class="rotor-unit">
+                    <div class="rotor-btn" onclick="adjustRotor(1, 1)">▲</div>
+                    <div class="rotor-window" id="r1">A</div>
+                    <div class="rotor-btn" onclick="adjustRotor(1, -1)">▼</div>
+                </div>
+                <div class="rotor-unit">
+                    <div class="rotor-btn" onclick="adjustRotor(2, 1)">▲</div>
+                    <div class="rotor-window" id="r2">A</div>
+                    <div class="rotor-btn" onclick="adjustRotor(2, -1)">▼</div>
+                </div>
+            </div>
+
+            <!-- 3. LAMPBOARD -->
+            <div id="lampboard"></div>
+
+            <!-- 4. KEYBOARD -->
+            <div id="keyboard"></div>
+
+            <!-- 5. PLUGBOARD -->
+            <div id="plugboard-section">
+                <div class="plug-label">STECKERBRETT (MAX 10 PAIRS)</div>
+                <!-- Wires drawn here -->
+                <svg id="wire-layer" style="filter: drop-shadow(0px 5px 3px rgba(0,0,0,0.5));"></svg>
+                <!-- Sockets injected here -->
+                <div id="sockets-container" style="display:flex; flex-direction:column; gap:12px; align-items:center;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const KEYBOARD_LAYOUT = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+        
+        const ROTOR_DATA = {
+            I:   { map: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: "Q" },
+            II:  { map: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: "E" },
+            III: { map: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: "V" }
+        };
+        const REFLECTOR_B = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+        
+        // Realistic Cable Colors
+        const CABLE_COLORS = [
+            '#b71c1c', // Deep Red
+            '#0d47a1', // Deep Blue
+            '#1b5e20', // Forest Green
+            '#f57f17', // Dark Yellow/Gold
+            '#4e342e', // Brown
+            '#4a148c', // Deep Purple
+            '#263238', // Dark Grey
+            '#bf360c', // Burnt Orange
+            '#006064', // Cyan Dark
+            '#3e2723'  // Dark Brown
+        ];
+
+        // --- STATE ---
+        const state = {
+            rotors: [
+                { type: 'I',   pos: 0 },
+                { type: 'II',  pos: 0 },
+                { type: 'III', pos: 0 }
+            ],
+            plugs: {}, // Map 'A':'Z', 'Z':'A'
+            plugPairs: [], // Array of pairs for coloring [['A','Z'], ...]
+            selectedPlug: null, // 'A' if waiting for pair
+            history: ""
+        };
+
+        // --- AUDIO ---
+        let audioCtx;
+        function playSound(type) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(100, t+0.05);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t+0.05);
+            } else if (type === 'plug') {
+                // Thud for plugging in
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(100, t);
+                osc.frequency.exponentialRampToValueAtTime(10, t+0.1);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t+0.1);
+            } else {
+                // Key clack
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, t);
+                osc.frequency.exponentialRampToValueAtTime(50, t+0.1);
+                gain.gain.setValueAtTime(0.15, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t+0.1);
+            }
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t+0.2);
+        }
+
+        // --- CORE LOGIC ---
+        const toIdx = c => c.charCodeAt(0) - 65;
+        const toChar = i => String.fromCharCode(((i % 26) + 26) % 26 + 65);
+
+        function map(idx, mapStr, offset, inverse) {
+            const shift = offset;
+            const input = (idx + shift) % 26;
+            let output;
+            if (!inverse) {
+                output = toIdx(mapStr[input]);
+            } else {
+                output = mapStr.indexOf(toChar(input));
+            }
+            return (output - shift + 26) % 26;
+        }
+
+        function encrypt(char) {
+            // 0. Plugboard IN
+            if (state.plugs[char]) char = state.plugs[char];
+            
+            let idx = toIdx(char);
+
+            // 1. Step Rotors (Right always steps)
+            const r0 = state.rotors[0];
+            const r1 = state.rotors[1];
+            const r2 = state.rotors[2];
+
+            const n1 = ROTOR_DATA[r1.type].notch;
+            const n2 = ROTOR_DATA[r2.type].notch;
+
+            let step1 = false;
+            let step0 = false;
+
+            if (toChar(r2.pos) === n2) step1 = true;
+            if (toChar(r1.pos) === n1) { step1 = true; step0 = true; }
+
+            r2.pos = (r2.pos + 1) % 26;
+            if (step1) r1.pos = (r1.pos + 1) % 26;
+            if (step0) r0.pos = (r0.pos + 1) % 26;
+
+            updateRotors();
+
+            // 2. Forward Pass
+            idx = map(idx, ROTOR_DATA[r2.type].map, r2.pos, false);
+            idx = map(idx, ROTOR_DATA[r1.type].map, r1.pos, false);
+            idx = map(idx, ROTOR_DATA[r0.type].map, r0.pos, false);
+
+            // 3. Reflector
+            idx = toIdx(REFLECTOR_B[idx]);
+
+            // 4. Reverse Pass
+            idx = map(idx, ROTOR_DATA[r0.type].map, r0.pos, true);
+            idx = map(idx, ROTOR_DATA[r1.type].map, r1.pos, true);
+            idx = map(idx, ROTOR_DATA[r2.type].map, r2.pos, true);
+
+            let outChar = toChar(idx);
+
+            // 5. Plugboard OUT
+            if (state.plugs[outChar]) outChar = state.plugs[outChar];
+
+            return outChar;
+        }
+
+        // --- PLUGBOARD LOGIC ---
+        function handleSocketClick(char) {
+            playSound('plug');
+
+            // Case 1: Already plugged -> Disconnect
+            if (state.plugs[char]) {
+                const partner = state.plugs[char];
+                delete state.plugs[char];
+                delete state.plugs[partner];
+                state.plugPairs = state.plugPairs.filter(p => !p.includes(char));
+                state.selectedPlug = null;
+                renderSockets();
+                renderWires();
+                return;
+            }
+
+            // Case 2: Deselect self
+            if (state.selectedPlug === char) {
+                state.selectedPlug = null;
+                renderSockets();
+                return;
+            }
+
+            // Case 3: Select first of pair
+            if (!state.selectedPlug) {
+                // Max 10 pairs check
+                if (state.plugPairs.length >= 10) return;
+                state.selectedPlug = char;
+                renderSockets();
+                return;
+            }
+
+            // Case 4: Connect pair
+            const p1 = state.selectedPlug;
+            const p2 = char;
+            state.plugs[p1] = p2;
+            state.plugs[p2] = p1;
+            state.plugPairs.push([p1, p2]);
+            state.selectedPlug = null;
+            renderSockets();
+            renderWires();
+        }
+
+        function renderSockets() {
+            document.querySelectorAll('.socket').forEach(el => {
+                const char = el.dataset.char;
+                el.className = 'socket'; // reset
+                // if (state.plugs[char]) el.classList.add('connected'); // No longer needed, SVG handles visual
+                if (state.selectedPlug === char) el.classList.add('selected');
+            });
+        }
+
+        function renderWires() {
+            const svg = document.getElementById('wire-layer');
+            svg.innerHTML = ''; // Clear
+
+            // Create defs for shadows/gradients if needed
+            // Currently using CSS filter on the SVG container for global shadow
+
+            state.plugPairs.forEach((pair, idx) => {
+                const [c1, c2] = pair;
+                const el1 = document.querySelector(`.socket[data-char="${c1}"]`);
+                const el2 = document.querySelector(`.socket[data-char="${c2}"]`);
+                if(!el1 || !el2) return;
+
+                const rect1 = el1.getBoundingClientRect();
+                const rect2 = el2.getBoundingClientRect();
+                const svgRect = svg.getBoundingClientRect();
+
+                // Center points relative to SVG
+                const x1 = rect1.left + rect1.width/2 - svgRect.left;
+                const y1 = rect1.top + rect1.height/2 - svgRect.top;
+                const x2 = rect2.left + rect2.width/2 - svgRect.left;
+                const y2 = rect2.top + rect2.height/2 - svgRect.top;
+
+                // Physics logic: Gravity drop based on horizontal distance
+                const dist = Math.abs(x1 - x2);
+                const drop = 50 + (dist * 0.35); 
+                const midX = (x1 + x2) / 2;
+                const midY = Math.max(y1, y2) + drop;
+
+                // Path data
+                const d = `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`;
+                const color = CABLE_COLORS[idx % CABLE_COLORS.length];
+
+                // --- LAYER 1: Thick Cable Body ---
+                const cable = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                cable.setAttribute("d", d);
+                cable.setAttribute("fill", "none");
+                cable.setAttribute("stroke", color);
+                cable.setAttribute("stroke-width", "8"); // Thicker cable
+                cable.setAttribute("stroke-linecap", "round");
+                svg.appendChild(cable);
+
+                // --- LAYER 2: Highlight/Texture (Simulate braided fabric) ---
+                const texture = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                texture.setAttribute("d", d);
+                texture.setAttribute("fill", "none");
+                texture.setAttribute("stroke", "rgba(255,255,255,0.15)");
+                texture.setAttribute("stroke-width", "4");
+                texture.setAttribute("stroke-linecap", "round");
+                // Dashed line creates a 'braided' look
+                texture.setAttribute("stroke-dasharray", "2,2"); 
+                svg.appendChild(texture);
+
+                // --- LAYER 3: The Plug Heads (Bakelite Caps) ---
+                // Draw a cap at both start and end
+                [ {x:x1, y:y1}, {x:x2, y:y2} ].forEach(pt => {
+                    const cap = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    cap.setAttribute("cx", pt.x);
+                    cap.setAttribute("cy", pt.y);
+                    cap.setAttribute("r", "12"); // Covers the socket hole
+                    cap.setAttribute("fill", "#1a1a1a"); // Bakelite black
+                    cap.setAttribute("stroke", "#3e2723"); // Brownish rim
+                    cap.setAttribute("stroke-width", "2");
+                    svg.appendChild(cap);
+                    
+                    // Small screw/detail on top of plug
+                    const screw = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    screw.setAttribute("cx", pt.x);
+                    screw.setAttribute("cy", pt.y);
+                    screw.setAttribute("r", "3");
+                    screw.setAttribute("fill", "#555");
+                    svg.appendChild(screw);
+                });
+            });
+        }
+
+        // --- UI RENDERERS ---
+        function buildGrid(id, itemClass) {
+            const container = document.getElementById(id);
+            container.innerHTML = '';
+            KEYBOARD_LAYOUT.forEach(rowStr => {
+                const row = document.createElement('div');
+                row.className = 'row';
+                rowStr.split('').forEach(char => {
+                    const el = document.createElement('div');
+                    el.className = itemClass;
+                    el.dataset.char = char;
+                    if (itemClass === 'key') {
+                        const cap = document.createElement('div');
+                        cap.className = 'key-cap';
+                        cap.innerText = char;
+                        el.appendChild(cap);
+                        // Mouse/Touch Events
+                        const press = (e) => { e.preventDefault(); handleKey(char, true); };
+                        const release = (e) => { e.preventDefault(); handleKey(char, false); };
+                        el.onmousedown = press;
+                        el.onmouseup = release;
+                        el.onmouseleave = (e) => { if(isPressed) release(e); };
+                        el.ontouchstart = press;
+                        el.ontouchend = release;
+                    } else if (itemClass === 'socket') {
+                        el.onclick = () => handleSocketClick(char);
+                    } else {
+                        // Lamp
+                        el.innerText = char;
+                    }
+                    row.appendChild(el);
+                });
+                container.appendChild(row);
+            });
+        }
+
+        // --- INTERACTION ---
+        let isPressed = false;
+        
+        function handleKey(char, down) {
+            const keyEl = document.querySelector(`.key[data-char="${char}"]`);
+            
+            if (down) {
+                if (isPressed) return;
+                isPressed = true;
+                if(keyEl) keyEl.classList.add('pressed');
+                playSound('clack');
+
+                const out = encrypt(char);
+                const lamp = document.querySelector(`.lamp[data-char="${out}"]`);
+                if(lamp) lamp.classList.add('active');
+
+                // Output Display
+                state.history += out;
+                const fmt = state.history.match(/.{1,4}/g).join(" ");
+                const disp = document.getElementById('output-text');
+                disp.innerText = fmt;
+                disp.scrollLeft = disp.scrollWidth;
+
+            } else {
+                isPressed = false;
+                if(keyEl) keyEl.classList.remove('pressed');
+                document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
+            }
+        }
+
+        function updateRotors() {
+            document.getElementById('r0').innerText = toChar(state.rotors[0].pos);
+            document.getElementById('r1').innerText = toChar(state.rotors[1].pos);
+            document.getElementById('r2').innerText = toChar(state.rotors[2].pos);
+        }
+
+        function adjustRotor(idx, dir) {
+            playSound('click');
+            state.rotors[idx].pos = (state.rotors[idx].pos - dir + 26) % 26;
+            updateRotors();
+        }
+
+        function copyCipher() {
+            if(!state.history) return;
+            const fmt = state.history.match(/.{1,4}/g).join(" ");
+            navigator.clipboard.writeText(fmt);
+            const ind = document.getElementById('copy-indicator');
+            ind.classList.add('show');
+            setTimeout(() => ind.classList.remove('show'), 1500);
+        }
+
+        // --- INIT ---
+        buildGrid('lampboard', 'lamp');
+        buildGrid('keyboard', 'key');
+        buildGrid('sockets-container', 'socket');
+        
+        // Handle window resize for wire redrawing
+        window.addEventListener('resize', renderWires);
+
+        window.addEventListener('keydown', e => {
+            const k = e.key.toUpperCase();
+            if(ALPHABET.includes(k) && !e.repeat && !e.ctrlKey && !e.altKey) handleKey(k, true);
+        });
+        window.addEventListener('keyup', e => {
+            const k = e.key.toUpperCase();
+            if(ALPHABET.includes(k)) handleKey(k, false);
+        });
+    </script>
+</body>
+</html>

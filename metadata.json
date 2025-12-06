@@ -1,0 +1,5 @@
+{
+  "name": "NEO-ENIGMA",
+  "description": "A hyper-realistic, mathematically accurate Enigma M3 machine simulator with a tactile UI, plugboard visualization, and synthesized audio.",
+  "requestFramePermissions": []
+}
